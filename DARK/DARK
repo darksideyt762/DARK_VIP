@@ -7,13 +7,13 @@ echo "----------------------------"
 
 chmod +x etc/*.bms
 
-if [[ -d "/data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK" ]]; then
+if [[ -d "/data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/DARK_PAK" ]]; then
   echo ""
 else
-  mkdir /data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK
+  mkdir /data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/DARK_PAK
 fi
-   pak_folder="/data/data/com.termux/files/home/DARK_OUTPUT/pak_folder"
-   output_folder="/data/data/com.termux/files/home/DARK_OUTPUT/output_folder"
+   pak_folder="/data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/pak_folder"
+   output_folder="/data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/output_folder"
 
 function unpak32 () {
   qemu-i386 $PREFIX/share/quickbms/quickbms etc/script.bms $pak_folder/$(basename "$selected_file") $output_folder
@@ -51,12 +51,12 @@ done
 
 
 function repak64 {
-    qemu-i386 $PREFIX/share/quickbms/quickbms_4gb_files -w -r -r etc/repak.bms $selected_file /data/data/com.termux/files/home/DARK_OUTPUT/copied_dat
+    qemu-i386 $PREFIX/share/quickbms/quickbms_4gb_files -w -r -r etc/repak.bms $selected_file /data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/copied_dat
     
 }
 
 function repak32 {
-    qemu-i386 $PREFIX/share/quickbms/quickbms -w -r -r etc/repak.bms $selected_file /data/data/com.termux/files/home/DARK_OUTPUT/copied_dat
+    qemu-i386 $PREFIX/share/quickbms/quickbms -w -r -r etc/repak.bms $selected_file /data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/copied_dat
     
 }
 
@@ -91,7 +91,7 @@ done
 
  function unpack {
    prompt="Please select a file to unpack:"
-   options=($(find /data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK -name "*.pak" -o -name "*.obb"))
+   options=($(find /data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/DARK_PAK -name "*.pak" -o -name "*.obb"))
 
    PS3="$prompt "
    select opt in "${options[@]}" "Quit" ; do 
@@ -120,7 +120,7 @@ done
 
  function repack {
   prompt="Please select a file to repack:"
-  options=($(find /data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK -name "*.pak" -o -name "*.obb"))
+  options=($(find /data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/DARK_PAK -name "*.pak" -o -name "*.obb"))
 
   PS3="$prompt "
   select opt in "${options[@]}" "Quit" ; do 
@@ -198,7 +198,7 @@ done
         echo "- $(basename "$file")"
       done
 
-      copied_dat="/data/data/com.termux/files/home/DARK_OUTPUT/copied_dat"
+      copied_dat="/data/data/com.termux/files/home/DARK_VIP/DARK_OUTPUT/copied_dat"
       if [ ! -d "$copied_dat" ]; then
         mkdir -p "$copied_dat"
         echo "Created directory '$copied_dat'."
