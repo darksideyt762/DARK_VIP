@@ -1,0 +1,251 @@
+#!/usr/bin/env bash
+
+source etc/banner
+
+echo -e "executing: ${LIGHTGREEN}          DARK OBB TOOL${BLUE}"
+echo "----------------------------"
+
+chmod +x etc/*.bms
+
+if [[ -d "/data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK" ]]; then
+  echo ""
+else
+  mkdir /data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK
+fi
+   pak_folder="/data/data/com.termux/files/home/DARK_OUTPUT/pak_folder"
+   output_folder="/data/data/com.termux/files/home/DARK_OUTPUT/output_folder"
+
+function unpak32 () {
+  qemu-i386 $PREFIX/share/quickbms/quickbms etc/script.bms $pak_folder/$(basename "$selected_file") $output_folder
+}
+
+function unpak64 () {
+  qemu-i386 $PREFIX/share/quickbms/quickbms_4gb_files etc/script.bms $pak_folder/$(basename "$selected_file") $output_folder
+}
+
+function unpacking {
+echo -e "please choice pubg mode bit"
+echo -e "ANDROID 10-11 choose 64bit"
+echo -e "ANDROID 6-9 choose 32bit"
+PS3='PLEASE CHOOSE: '
+options=("32bit" "64bit" "Quit")
+select bit in "${options[@]}"
+do
+    case $bit in
+        "32bit")
+            unpak32
+            break
+            ;;
+        "64bit")
+            unpak64
+            break
+            ;;
+        "Quit")
+            break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done 
+}
+
+
+
+function repak64 {
+    qemu-i386 $PREFIX/share/quickbms/quickbms_4gb_files -w -r -r etc/repak.bms $selected_file /data/data/com.termux/files/home/DARK_OUTPUT/copied_dat
+    
+}
+
+function repak32 {
+    qemu-i386 $PREFIX/share/quickbms/quickbms -w -r -r etc/repak.bms $selected_file /data/data/com.termux/files/home/DARK_OUTPUT/copied_dat
+    
+}
+
+
+
+function repacking {
+echo -e "please choice pubg mode bit"
+echo -e "ANDROID 10-11 choose 64bit"
+echo -e "ANDROID 6-9 choose 32bit"
+PS3='PLEASE CHOOSE: '
+options=("32bit" "64bit" "Quit")
+select bit in "${options[@]}"
+do
+    case $bit in
+        "32bit")
+            repak32
+            break
+            ;;
+        "64bit")
+            repak64
+            break
+            
+            ;;
+        "Quit")
+            exit
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done 
+}
+
+
+ function unpack {
+   prompt="Please select a file to unpack:"
+   options=($(find /data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK -name "*.pak" -o -name "*.obb"))
+
+   PS3="$prompt "
+   select opt in "${options[@]}" "Quit" ; do 
+       if (( REPLY == 1 + ${#options[@]} )) ; then
+           echo "Operation canceled."
+           exit
+
+       elif (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+           selected_file="${options[$REPLY-1]}"
+           echo "You picked $selected_file which is file $REPLY"
+
+           mkdir -p "$pak_folder"
+           cp "$selected_file" "$pak_folder/"
+           
+           unpacking
+           
+           rm -rf $pak_folder
+           
+           break
+
+       else
+           echo "Invalid option. Try another one."
+       fi
+   done
+}
+
+ function repack {
+  prompt="Please select a file to repack:"
+  options=($(find /data/data/com.termux/files/home/DARK_OUTPUT/DARK_PAK -name "*.pak" -o -name "*.obb"))
+
+  PS3="$prompt "
+  select opt in "${options[@]}" "Quit" ; do 
+      if (( REPLY == 1 + ${#options[@]} )) ; then
+          echo "Operation canceled."
+          exit
+
+      elif (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+          selected_file="${options[$REPLY-1]}"
+          echo "You picked $selected_file which is file $REPLY"
+          
+          repacking
+          
+          break
+
+      else
+          echo "Invalid option. Try another one."
+      fi
+  done
+}
+
+ function Search_Text {
+  read -p "Enter the string to search for: " search_string
+  
+  search_results=( $(grep -ril "$search_string" $output_folder) )
+
+      if [ ${#search_results[@]} -eq 0 ]; then
+    echo "No matching files found."
+  else
+    echo "Matching files:"
+    for ((i=0; i<${#search_results[@]}; i++)); do
+      
+      if [ $i -eq 0 ]; then
+        echo -e "\e[32m$(($i+1)): $(basename "${search_results[$i]}")\e[0m"
+      else
+        echo "$(($i+1)): $(basename "${search_results[$i]}")"
+      fi
+    done
+
+    all_files_option="All"
+    quit_option="Quit"
+    copy_all_option="Copy All"
+    options=("Select One" "$all_files_option" "$copy_all_option" "$quit_option")
+    selected_files=()
+
+    while true; do
+      read -p "Enter file numbers to add to the selection (e.g., 2,5,6,4), 'a' to select all, or 'q' to quit: " choice
+
+      if [ "$choice" = "q" ]; then
+        echo "Operation canceled."
+        break
+      elif [ "$choice" = "a" ]; then
+        selected_files=("${search_results[@]}")
+        echo "All files selected."
+        break
+      else
+        IFS=',' read -ra file_numbers <<< "$choice"
+
+        for num in "${file_numbers[@]}"; do
+          if [ "$num" -ge 1 ] && [ "$num" -le ${#search_results[@]} ]; then
+            selected_files+=("${search_results[$((num-1))]}")
+            echo "File '$(basename "${search_results[$((num-1))]}")' added to selection."
+          else
+            echo "Invalid file number '$num'. Try another one."
+          fi
+        done
+      fi
+    done
+
+    if [ "${#selected_files[@]}" -eq 0 ]; then
+      echo "No files selected for copying."
+    else
+      echo "Selected files:"
+      for file in "${selected_files[@]}"; do
+        echo "- $(basename "$file")"
+      done
+
+      copied_dat="/data/data/com.termux/files/home/DARK_OUTPUT/copied_dat"
+      if [ ! -d "$copied_dat" ]; then
+        mkdir -p "$copied_dat"
+        echo "Created directory '$copied_dat'."
+      fi
+
+      read -p "Enter 'c' to copy all selected files or 'q' to quit: " copy_option
+      if [ "$copy_option" = "c" ]; then
+        for file in "${selected_files[@]}"; do
+          cp "$file" "$copied_dat/"
+          echo "File '$(basename "$file")' copied to the destination directory."
+        done
+      else
+        echo "Operation canceled."
+      fi
+    fi
+  fi
+}
+
+  function Delete_Output {
+  if [[ -d "$output_folder" ]]; then
+    rm -rf "$output_folder"
+  else
+    bash bottool
+  fi
+}
+
+PS3='Please enter your choice: '
+options=("Unpack" "Repack" "Search_Text" "Delete_Output" "Quit")
+select opt in "${options[@]}"
+do
+  case $opt in
+    "Unpack")
+      unpack
+      break
+      ;;
+    "Repack")
+      repack
+      ;;
+    "Search_Text")
+      Search_Text
+      ;;
+    "Delete_Output")
+      Delete_Output
+      ;;
+    "Quit")
+      break
+      ;;
+    *) echo "invalid option $REPLY";;
+  esac
+done
